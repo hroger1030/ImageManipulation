@@ -117,7 +117,7 @@ namespace ImageManipulation
 
             try
             {
-                // wierd fucking accorbatics in code to get the bitmap object to release its handels...
+                // wierd fucking accrobatics in code to get the bitmap object to release its handels...
                 Bitmap buffer = new Bitmap(_Image);
                 _Image.Dispose();
                 GC.Collect();
