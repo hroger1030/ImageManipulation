@@ -70,7 +70,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="cImage.cs" />
     <Compile Include="HelperFunctions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

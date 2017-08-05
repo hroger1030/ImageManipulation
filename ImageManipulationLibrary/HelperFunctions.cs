@@ -102,15 +102,15 @@ namespace ImageManipulation
         /// <summary>
         /// resizes an image without preserving aspect ratio
         /// </summary>
-        public static byte[] ResizeImage(byte[] image_bytes, int width, int height)
+        public static byte[] ResizeImage(byte[] imageBytes, int width, int height)
         {
-            if (image_bytes == null)
+            if (imageBytes == null)
                 throw new ArgumentException("Image bytes cannot be null");
 
-            if (image_bytes.Length < 1)
+            if (imageBytes.Length < 1)
                 throw new ArgumentException("Image bytes cannot empty");
 
-            using (var input_stream = new MemoryStream(image_bytes))
+            using (var input_stream = new MemoryStream(imageBytes))
             {
                 using (var input_image = new Bitmap(input_stream))
                 {
@@ -129,7 +129,7 @@ namespace ImageManipulation
         /// <summary>
         /// resizes an image without preserving aspect ratio
         /// </summary>
-        public static Bitmap ResizeImage(Bitmap input_image, int width, int height)
+        public static Bitmap ResizeImage(Bitmap inputImage, int width, int height)
         {
             if (width < 1)
                 throw new ArgumentException($"Cannot scale an image to a width of {width}");
@@ -138,7 +138,7 @@ namespace ImageManipulation
                 throw new ArgumentException($"Cannot scale an image to a height of {height}");
 
             Bitmap output_image = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            output_image.SetResolution(input_image.HorizontalResolution, input_image.VerticalResolution);
+            output_image.SetResolution(inputImage.HorizontalResolution, inputImage.VerticalResolution);
 
             using (var graphics = Graphics.FromImage(output_image))
             {
@@ -151,9 +151,9 @@ namespace ImageManipulation
                 {
                     image_attributes.SetWrapMode(WrapMode.TileFlipXY);
 
-                    graphics.DrawImage(input_image,
+                    graphics.DrawImage(inputImage,
                                         new Rectangle(0, 0, width, height),             // target image area
-                                        0, 0, input_image.Width, input_image.Height,    // source image area
+                                        0, 0, inputImage.Width, inputImage.Height,    // source image area
                                         GraphicsUnit.Pixel,
                                         image_attributes);
                 }
@@ -201,9 +201,9 @@ namespace ImageManipulation
         /// <summary>
         /// Creates new image from text string. Output image is sized to fit input text.
         /// </summary>
-        public static Bitmap WriteTextToImage(string font_name, float font_size, FontStyle font_style, string text, Color text_color, Color background_color, bool transparent)
+        public static Bitmap WriteTextToImage(string fontName, float font_size, FontStyle font_style, string text, Color text_color, Color background_color, bool transparent)
         {
-            if (string.IsNullOrWhiteSpace(font_name))
+            if (string.IsNullOrWhiteSpace(fontName))
                 throw new ArgumentException("Cannot write text with a null font");
 
             if (font_size < float.Epsilon)
@@ -215,7 +215,7 @@ namespace ImageManipulation
             if (text_color == null)
                 throw new ArgumentException("Text color cannot be null");
 
-            using (Font font = new Font(font_name, font_size, font_style, GraphicsUnit.Pixel))
+            using (Font font = new Font(fontName, font_size, font_style, GraphicsUnit.Pixel))
             {
                 SizeF estimated_size = EstimateTextWidth(font, text);
                 Bitmap output_image = new Bitmap((int)estimated_size.Width, (int)estimated_size.Height);
@@ -236,9 +236,9 @@ namespace ImageManipulation
             }
         }
 
-        public static Dictionary<char, Bitmap> GenerateFontMappedCharacterSet(string font_name, float font_size, FontStyle font_style, char[] character_set, Color text_color, Color background_color, bool transparent)
+        public static Dictionary<char, Bitmap> GenerateFontMappedCharacterSet(string fontName, float font_size, FontStyle font_style, char[] character_set, Color text_color, Color background_color, bool transparent)
         {
-            if (string.IsNullOrWhiteSpace(font_name))
+            if (string.IsNullOrWhiteSpace(fontName))
                 throw new ArgumentException("Cannot write text with a null font");
 
             if (font_size < float.Epsilon)
@@ -259,7 +259,7 @@ namespace ImageManipulation
             {
                 if (!output.ContainsKey(character))
                 {
-                    var character_image = WriteTextToImage(font_name, font_size, font_style, character.ToString(), text_color, background_color, transparent);
+                    var character_image = WriteTextToImage(fontName, font_size, font_style, character.ToString(), text_color, background_color, transparent);
                     output.Add(character, character_image);
                 }
             }
@@ -303,32 +303,32 @@ namespace ImageManipulation
         /// <summary>
         /// renders an image on top of another image. Overlayed image will be centered on background image.
         /// </summary>
-        public static Bitmap OverlayImage(Bitmap backgound_image, Bitmap overlay_image)
+        public static Bitmap OverlayImage(Bitmap backgoundImage, Bitmap overlay_image)
         {
-            Point center_point = new Point((backgound_image.Width - overlay_image.Width) / 2, (backgound_image.Height - overlay_image.Height) / 2);
-            return OverlayImage(backgound_image, overlay_image, center_point);
+            Point center_point = new Point((backgoundImage.Width - overlay_image.Width) / 2, (backgoundImage.Height - overlay_image.Height) / 2);
+            return OverlayImage(backgoundImage, overlay_image, center_point);
         }
 
         /// <summary>
         /// renders an image on top of another image. Overlayed image will be placed at location of point.
         /// </summary>
-        public static Bitmap OverlayImage(Bitmap backgound_image, Bitmap overlay_image, Point overlay_point)
+        public static Bitmap OverlayImage(Bitmap backgoundImage, Bitmap overlayImage, Point overlayPoint)
         {
-            if (backgound_image == null)
+            if (backgoundImage == null)
                 throw new ArgumentException("Background image cannot be null");
 
-            if (overlay_image == null)
+            if (overlayImage == null)
                 throw new ArgumentException("Overlay image cannot be null");
 
-            using (var graphics = Graphics.FromImage(backgound_image))
+            using (var graphics = Graphics.FromImage(backgoundImage))
             {
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                graphics.DrawImage(overlay_image, overlay_point.X, overlay_point.Y, overlay_image.Width, overlay_image.Height);
+                graphics.DrawImage(overlayImage, overlayPoint.X, overlayPoint.Y, overlayImage.Width, overlayImage.Height);
             }
 
-            return backgound_image;
+            return backgoundImage;
         }
 
         /// <summary>
@@ -622,6 +622,34 @@ namespace ImageManipulation
             }
 
             return output;
+        }
+
+        public static Bitmap ConvertToSepiaTone(Bitmap input)
+        {
+            //http://blogs.techrepublic.com.com/howdoi/?p=120 for full details
+
+            int height = input.Size.Height;
+            int width = input.Size.Width;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    Color color = input.GetPixel(x, y);
+
+                    double output_red = (color.R * .393) + (color.G * .769) + (color.B * .189);
+                    double output_green = (color.R * .349) + (color.G * .686) + (color.B * .168);
+                    double output_blue = (color.R * .272) + (color.G * .534) + (color.B * .131);
+
+                    if (output_red > 255) output_red = 255;
+                    if (output_green > 255) output_green = 255;
+                    if (output_blue > 255) output_blue = 255;
+
+                    input.SetPixel(x, y, Color.FromArgb((int)output_red, (int)output_green, (int)output_blue));
+                }
+            }
+
+            return input;
         }
 
         public static byte[] ComputeThumbprint(Bitmap input)
