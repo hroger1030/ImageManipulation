@@ -652,9 +652,10 @@ namespace ImageManipulation
             return input;
         }
 
-        public static byte[] ComputeThumbprint(Bitmap input)
+        public static byte[] ComputeHash(Bitmap input)
         {
             // http://www.hackerfactor.com/blog/?/archives/432-Looks-Like-It.html
+            // https://jenssegers.com/61/perceptual-image-hashes
 
             // 1) resize
             Bitmap thumbnail = ResizeImage(input, 8, 8);
@@ -685,6 +686,30 @@ namespace ImageManipulation
                 thumbnail.Dispose();
 
             return BitConverter.GetBytes(image_hash);
+        }
+
+        /// <summary>
+        /// Method to determine how similar two image hash string are.
+        /// takes in byte arrays and computes Hamming distance by counting 
+        /// the number of bits that differ between them.
+        /// </summary>
+        public static int ComputeHammingDistance(byte[] array1, byte[] array2)
+        {
+            if (array1 == null || array2 == null)
+                throw new ArgumentException("One or both arrays are null");
+
+            if (array1.Length != array2.Length)
+                throw new ArgumentException("Arrays are unequal lengths");
+
+            int diff_count = 0;
+
+            for (int i = 0; i < array1.Length; i++)
+            {
+                if (array1[i] != array2[i])
+                    diff_count++;
+            }
+
+            return diff_count;
         }
     }
 }
