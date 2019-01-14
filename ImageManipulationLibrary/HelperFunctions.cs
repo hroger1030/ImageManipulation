@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
+using System.Text;
 
 namespace ImageManipulation
 {
@@ -710,6 +711,14 @@ namespace ImageManipulation
             }
 
             return diff_count;
+        }
+
+        public static string ByteWriter(byte[] array)
+        {
+            if (array == null || array.Length < 1)
+                throw new ArgumentException("array cannot be null or empty");
+
+            return BitConverter.ToString(array).Replace("-", string.Empty).ToLower();
         }
     }
 }

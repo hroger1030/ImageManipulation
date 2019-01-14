@@ -37,8 +37,8 @@ namespace Workbench
             var hash1 = HelperFunctions.ComputeHash(bitmap1);
             var hash2 = HelperFunctions.ComputeHash(bitmap2);
 
-            Console.WriteLine($"Image 1 hash: {Encoding.UTF8.GetString(hash1, 0, hash1.Length)}");
-            Console.WriteLine($"Image 2 hash: {Encoding.UTF8.GetString(hash1, 0, hash2.Length)}");
+            Console.WriteLine($"Image 1 hash: {HelperFunctions.ByteWriter(hash1)}");
+            Console.WriteLine($"Image 2 hash: {HelperFunctions.ByteWriter(hash2)}");
 
             var count = HelperFunctions.ComputeHammingDistance(hash1, hash2);
 
