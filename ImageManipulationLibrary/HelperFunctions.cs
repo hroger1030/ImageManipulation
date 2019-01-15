@@ -5,7 +5,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
-using System.Text;
 
 namespace ImageManipulation
 {
@@ -44,8 +43,8 @@ namespace ImageManipulation
                 throw new ArgumentException($"Cannot scale an image to a height of {max_height}");
 
             // Figure out the ratio
-            double ratio_x = (double)max_width / (double)image.Width;
-            double ratio_y = (double)max_height / (double)image.Height;
+            double ratio_x = max_width / (double)image.Width;
+            double ratio_y = max_height / (double)image.Height;
 
             // use smaller value
             double ratio = ratio_x < ratio_y ? ratio_x : ratio_y;
@@ -709,6 +708,22 @@ namespace ImageManipulation
                 if (array1[i] != array2[i])
                     diff_count++;
             }
+
+            return diff_count;
+        }
+
+        public static int ComputeSumByteDistance(byte[] array1, byte[] array2)
+        {
+            if (array1 == null || array2 == null)
+                throw new ArgumentException("One or both arrays are null");
+
+            if (array1.Length != array2.Length)
+                throw new ArgumentException("Arrays are unequal lengths");
+
+            int diff_count = 0;
+
+            for (int i = 0; i < array1.Length; i++)
+                diff_count += Math.Abs((int)array1[i] - (int)array2[i]);
 
             return diff_count;
         }

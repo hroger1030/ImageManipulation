@@ -9,8 +9,8 @@ namespace Workbench
 {
     public class Program
     {
-        private const string image1 = "D:\\SourceCode\\MTG\\TestApp\\bin\\Debug\\test1.png";
-        private const string image2 = "D:\\SourceCode\\MTG\\TestApp\\bin\\Debug\\test2.png";
+        private const string image1 = "D:\\SourceCode\\ImageManipulation\\Workbench\\bin\\Debug\\test1.png";
+        private const string image2 = "D:\\SourceCode\\ImageManipulation\\Workbench\\bin\\Debug\\test2.png";
 
         public static void Main(string[] args)
         {
@@ -41,8 +41,10 @@ namespace Workbench
             Console.WriteLine($"Image 2 hash: {HelperFunctions.ByteWriter(hash2)}");
 
             var count = HelperFunctions.ComputeHammingDistance(hash1, hash2);
-
             Console.WriteLine($"The two images differ by {count} bytes.");
+
+            count = HelperFunctions.ComputeSumByteDistance(hash1, hash2);
+            Console.WriteLine($"The two images differ by {count} values.");
 
             //////////////////////////////////////////////////////////////////
 
