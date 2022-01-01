@@ -28,7 +28,7 @@ namespace ImageManipulation
         /// <summary>
         /// Method to resize images given a max height and width, while maintaing aspect ratio.
         /// </summary>
-        public static Bitmap ResizeImageToMaximumSize(Bitmap image, int max_width, int max_height)
+        public static Bitmap ResizeImageToMaximumSize(Bitmap image, int maxWidth, int maxHeight)
         {
             if (image == null)
                 throw new ArgumentException("Cannot resize a null image");
@@ -36,15 +36,15 @@ namespace ImageManipulation
             // resizing to less than 1 is pointless... 
             // (get it? pointless? bwhahaha...)
 
-            if (max_width < 1)
-                throw new ArgumentException($"Cannot scale an image to a width of {max_width}");
+            if (maxWidth < 1)
+                throw new ArgumentException($"Cannot scale an image to a width of {maxWidth}");
 
-            if (max_height < 1)
-                throw new ArgumentException($"Cannot scale an image to a height of {max_height}");
+            if (maxHeight < 1)
+                throw new ArgumentException($"Cannot scale an image to a height of {maxHeight}");
 
             // Figure out the ratio
-            double ratio_x = max_width / (double)image.Width;
-            double ratio_y = max_height / (double)image.Height;
+            double ratio_x = maxWidth / (double)image.Width;
+            double ratio_y = maxHeight / (double)image.Height;
 
             // use smaller value
             double ratio = ratio_x < ratio_y ? ratio_x : ratio_y;
@@ -58,19 +58,19 @@ namespace ImageManipulation
         /// <summary>
         /// Rescales an image in byte format by a fixed factor given a fixed scale ratio
         /// </summary>
-        public static byte[] ResizeImage(byte[] image_bytes, double scale_factor)
+        public static byte[] ScaleImage(byte[] imageBytes, double scaleFactor)
         {
-            if (image_bytes == null)
+            if (imageBytes == null)
                 throw new ArgumentException("Image bytes cannot be null");
 
-            if (image_bytes.Length < 1)
+            if (imageBytes.Length < 1)
                 throw new ArgumentException("Image bytes cannot empty");
 
-            using (var input_stream = new MemoryStream(image_bytes))
+            using (var input_stream = new MemoryStream(imageBytes))
             {
                 using (Bitmap input_image = new Bitmap(input_stream))
                 {
-                    using (Bitmap output_bitmap = ResizeImage(input_image, scale_factor))
+                    using (Bitmap output_bitmap = ScaleImage(input_image, scaleFactor))
                     {
                         using (var output_stream = new MemoryStream())
                         {
@@ -85,16 +85,16 @@ namespace ImageManipulation
         /// <summary>
         /// Rescales an image by a fixed factor given a fixed scale ratio
         /// </summary>
-        public static Bitmap ResizeImage(Bitmap image, double scale_factor)
+        public static Bitmap ScaleImage(Bitmap image, double scaleFactor)
         {
-            if (scale_factor == 1.0)
+            if (scaleFactor == 1.0)
                 return image;
 
-            if (scale_factor < double.Epsilon)
-                throw new ArgumentException($"Cannot scale an image by {scale_factor}");
+            if (scaleFactor < double.Epsilon)
+                throw new ArgumentException($"Cannot scale an image by {scaleFactor}");
 
-            int new_width = (int)Math.Round(scale_factor * image.Width);
-            int new_height = (int)Math.Round(scale_factor * image.Height);
+            int new_width = (int)Math.Round(scaleFactor * image.Width);
+            int new_height = (int)Math.Round(scaleFactor * image.Height);
 
             return ResizeImage(image, new_width, new_height);
         }
@@ -137,7 +137,7 @@ namespace ImageManipulation
             if (height < 1)
                 throw new ArgumentException($"Cannot scale an image to a height of {height}");
 
-            Bitmap output_image = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            var output_image = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             output_image.SetResolution(inputImage.HorizontalResolution, inputImage.VerticalResolution);
 
             using (var graphics = Graphics.FromImage(output_image))
@@ -146,7 +146,7 @@ namespace ImageManipulation
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
                 // we do this to prevent alias lines from being drawn around the image borders.
-                // this is probably better than putting down a background flod fill.
+                // this is probably better than putting down a background flood fill.
                 using (var image_attributes = new ImageAttributes())
                 {
                     image_attributes.SetWrapMode(WrapMode.TileFlipXY);
@@ -236,30 +236,30 @@ namespace ImageManipulation
             }
         }
 
-        public static Dictionary<char, Bitmap> GenerateFontMappedCharacterSet(string fontName, float font_size, FontStyle font_style, char[] character_set, Color text_color, Color background_color, bool transparent)
+        public static Dictionary<char, Bitmap> GenerateFontMappedCharacterSet(string fontName, float fontSize, FontStyle fontStyle, char[] characterSet, Color textColor, Color backgroundColor, bool transparent)
         {
             if (string.IsNullOrWhiteSpace(fontName))
                 throw new ArgumentException("Cannot write text with a null font");
 
-            if (font_size < float.Epsilon)
+            if (fontSize < float.Epsilon)
                 throw new ArgumentException("Font size must be greater than 0");
 
-            if (character_set == null || character_set.Length < 1)
+            if (characterSet == null || characterSet.Length < 1)
                 throw new ArgumentException("Cannot render a null or empty character set");
 
-            if (text_color == null)
+            if (textColor == null)
                 throw new ArgumentException("Text color cannot be null");
 
-            if (background_color == null)
+            if (backgroundColor == null)
                 throw new ArgumentException("Background color cannot be null");
 
             var output = new Dictionary<char, Bitmap>();
 
-            foreach (var character in character_set)
+            foreach (var character in characterSet)
             {
                 if (!output.ContainsKey(character))
                 {
-                    var character_image = WriteTextToImage(fontName, font_size, font_style, character.ToString(), text_color, background_color, transparent);
+                    var character_image = WriteTextToImage(fontName, fontSize, fontStyle, character.ToString(), textColor, backgroundColor, transparent);
                     output.Add(character, character_image);
                 }
             }
@@ -652,6 +652,41 @@ namespace ImageManipulation
             return input;
         }
 
+        public static Bitmap ConvertToToMonochrome(Image input)
+        {
+            if (input == null)
+                throw new ArgumentNullException("Image cannot be null");
+
+            var cm = new ColorMatrix(new float[][]
+            {
+                new float[] {0.299f, 0.299f, 0.299f, 0, 0},
+                new float[] {0.587f, 0.587f, 0.587f, 0, 0},
+                new float[] {0.114f, 0.114f, 0.114f, 0, 0},
+                new float[] { 0, 0, 0, 1, 0},
+                new float[] { 0, 0, 0, 0, 1}
+            });
+
+            var attributes = new ImageAttributes();
+            attributes.SetColorMatrix(cm);
+
+            Point[] points =
+            {
+                new Point(0, 0),
+                new Point(input.Width, 0),
+                new Point(0, input.Height),
+            };
+
+            var rect = new Rectangle(0, 0, input.Width, input.Height);
+
+            var output = new Bitmap(input.Width, input.Height);
+            using (Graphics gr = Graphics.FromImage(output))
+            {
+                gr.DrawImage(input, points, rect, GraphicsUnit.Pixel, attributes);
+            }
+
+            return output;
+        }
+
         public static byte[] ComputeHash(Bitmap input)
         {
             // http://www.hackerfactor.com/blog/?/archives/432-Looks-Like-It.html
@@ -660,7 +695,7 @@ namespace ImageManipulation
             // 1) resize
             Bitmap thumbnail = ResizeImage(input, 8, 8);
 
-            // 2) convert to greyscale
+            // 2) convert to gray scale
             thumbnail = ConvertImageToGrayscale(thumbnail);
 
             // 3) get average pixel color
