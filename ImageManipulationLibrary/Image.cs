@@ -1,4 +1,22 @@
-﻿using System;
+﻿/*
+The MIT License (MIT)
+
+Copyright (c) 2007 Roger Hill
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files 
+(the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, 
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do 
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE 
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -8,20 +26,23 @@ namespace ImageManipulation
 {
     public class Image
     {
-        protected string _FileName;
         protected Bitmap _Bitmap;
 
         public Image() { }
 
-        public Image(string fileName)
+        public Image(string filename)
         {
-            _FileName = fileName;
-            LoadImage();
+            if (string.IsNullOrWhiteSpace(filename))
+                throw new ArgumentNullException(nameof(filename));
+
+            if (!File.Exists(filename))
+                throw new FileNotFoundException("File not found", filename);
+
+            LoadImage(filename);
         }
 
-        public Image(string fileName, Bitmap bitmap)
+        public Image(Bitmap bitmap)
         {
-            _FileName = fileName;
             _Bitmap = bitmap;
         }
 
@@ -98,8 +119,11 @@ namespace ImageManipulation
             }
         }
 
-        public bool SaveImage()
+        public bool SaveImage(string filename)
         {
+            if (string.IsNullOrWhiteSpace(filename))
+                throw new ArgumentNullException(nameof(filename));
+
             if (_Bitmap == null)
                 return false;
 
@@ -111,7 +135,7 @@ namespace ImageManipulation
                 GC.Collect();
 
                 _Bitmap = buffer;
-                _Bitmap.Save(_FileName);
+                _Bitmap.Save(filename);
             }
             catch
             {
@@ -121,19 +145,23 @@ namespace ImageManipulation
             return true;
         }
 
-        public bool SaveImage(ImageFormat image_format)
+        public bool SaveImage(ImageFormat imageFormat, string filename)
         {
-            _FileName = _FileName.Replace(Path.GetExtension(_FileName), "." + image_format.ToString().ToLower());
-            return SaveImage();
+            filename = filename.Replace(Path.GetExtension(filename), "." + imageFormat.ToString().ToLower());
+            return SaveImage(filename);
         }
 
-        public bool LoadImage()
+        public bool LoadImage(string filename)
         {
+            if (string.IsNullOrWhiteSpace(filename))
+                throw new ArgumentNullException(nameof(filename));
+
+            if (!File.Exists(filename))
+                throw new FileNotFoundException("File not found", filename);
+
             try
             {
-                if (File.Exists(_FileName))
-                    _Bitmap = new Bitmap(_FileName);
-
+                _Bitmap = new Bitmap(filename);
                 return true;
             }
             catch
