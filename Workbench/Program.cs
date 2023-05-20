@@ -12,7 +12,7 @@ namespace Workbench
         private const string image1 = "D:\\SourceCode\\ImageManipulation\\Workbench\\bin\\Debug\\test1.png";
         private const string image2 = "D:\\SourceCode\\ImageManipulation\\Workbench\\bin\\Debug\\test2.png";
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             AppDomain.CurrentDomain.UnhandledException += Application_Error;
 

@@ -31,7 +31,7 @@ namespace ImageManipulation
         public static Bitmap ResizeImageToMaximumSize(Bitmap image, int maxWidth, int maxHeight)
         {
             if (image == null)
-                throw new ArgumentException("Cannot resize a null image");
+                throw new ArgumentNullException(nameof(image));
 
             // resizing to less than 1 is pointless... 
             // (get it? pointless? bwhahaha...)
@@ -60,22 +60,19 @@ namespace ImageManipulation
         /// </summary>
         public static byte[] ScaleImage(byte[] imageBytes, double scaleFactor)
         {
-            if (imageBytes == null)
-                throw new ArgumentException("Image bytes cannot be null");
+            if (imageBytes == null || imageBytes.Length < 1)
+                throw new ArgumentNullException(nameof(imageBytes), "ImageBytes cannot be null or empty");
 
-            if (imageBytes.Length < 1)
-                throw new ArgumentException("Image bytes cannot empty");
-
-            using (var input_stream = new MemoryStream(imageBytes))
+            using (var inputStream = new MemoryStream(imageBytes))
             {
-                using (Bitmap input_image = new Bitmap(input_stream))
+                using (var inputImage = new Bitmap(inputStream))
                 {
-                    using (Bitmap output_bitmap = ScaleImage(input_image, scaleFactor))
+                    using (var outputBitmap = ScaleImage(inputImage, scaleFactor))
                     {
-                        using (var output_stream = new MemoryStream())
+                        using (var outputStream = new MemoryStream())
                         {
-                            output_bitmap.Save(output_stream, ImageFormat.Png);
-                            return output_stream.ToArray();
+                            outputBitmap.Save(outputStream, ImageFormat.Png);
+                            return outputStream.ToArray();
                         }
                     }
                 }
@@ -87,6 +84,9 @@ namespace ImageManipulation
         /// </summary>
         public static Bitmap ScaleImage(Bitmap image, double scaleFactor)
         {
+            if (image == null)
+                throw new ArgumentNullException(nameof(image));
+
             if (scaleFactor == 1.0)
                 return image;
 
@@ -104,8 +104,8 @@ namespace ImageManipulation
         /// </summary>
         public static byte[] ResizeImage(byte[] imageBytes, int width, int height)
         {
-            if (imageBytes == null)
-                throw new ArgumentException("Image bytes cannot be null");
+            if (imageBytes == null || imageBytes.Length < 1)
+                throw new ArgumentNullException(nameof(imageBytes), "ImageBytes cannot be null or empty");
 
             if (imageBytes.Length < 1)
                 throw new ArgumentException("Image bytes cannot empty");
@@ -129,18 +129,21 @@ namespace ImageManipulation
         /// <summary>
         /// resizes an image without preserving aspect ratio
         /// </summary>
-        public static Bitmap ResizeImage(Bitmap inputImage, int width, int height)
+        public static Bitmap ResizeImage(Bitmap image, int width, int height)
         {
+            if (image == null)
+                throw new ArgumentNullException(nameof(image));
+
             if (width < 1)
                 throw new ArgumentException($"Cannot scale an image to a width of {width}");
 
             if (height < 1)
                 throw new ArgumentException($"Cannot scale an image to a height of {height}");
 
-            var output_image = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            output_image.SetResolution(inputImage.HorizontalResolution, inputImage.VerticalResolution);
+            var outputImage = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            outputImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            using (var graphics = Graphics.FromImage(output_image))
+            using (var graphics = Graphics.FromImage(outputImage))
             {
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
@@ -151,15 +154,15 @@ namespace ImageManipulation
                 {
                     image_attributes.SetWrapMode(WrapMode.TileFlipXY);
 
-                    graphics.DrawImage(inputImage,
+                    graphics.DrawImage(image,
                                         new Rectangle(0, 0, width, height),             // target image area
-                                        0, 0, inputImage.Width, inputImage.Height,    // source image area
+                                        0, 0, image.Width, image.Height,    // source image area
                                         GraphicsUnit.Pixel,
                                         image_attributes);
                 }
             }
 
-            return output_image;
+            return outputImage;
         }
 
         /// <summary>
@@ -168,16 +171,16 @@ namespace ImageManipulation
         public static Bitmap WriteTextToImage(Bitmap image, string fontName, float font_size, FontStyle fontStyle, string text, Color textColor)
         {
             if (image == null)
-                throw new ArgumentException("Cannot write text to a null image");
+                throw new ArgumentNullException(nameof(image));
 
             if (string.IsNullOrWhiteSpace(fontName))
-                throw new ArgumentException("Cannot write text with a null font");
+                throw new ArgumentNullException(nameof(fontName));
 
             if (font_size < float.Epsilon)
                 throw new ArgumentException("Font size must be greater than 0");
 
             if (string.IsNullOrWhiteSpace(text))
-                throw new ArgumentException("Cannot render a null or empty string");
+                throw new ArgumentNullException(nameof(text), "Cannot render a null or empty string");
 
             var write_area = new RectangleF(0, 0, image.Width, image.Height);
 
@@ -201,18 +204,18 @@ namespace ImageManipulation
         public static Bitmap WriteTextToImage(string fontName, float fontSize, FontStyle fontStyle, string text, Color textColor, Color backgroundColor, bool transparent)
         {
             if (string.IsNullOrWhiteSpace(fontName))
-                throw new ArgumentException("Cannot write text with a null font");
+                throw new ArgumentNullException(nameof(fontName), "Cannot write text with a null font");
 
             if (fontSize < float.Epsilon)
                 throw new ArgumentException("Font size must be greater than 0");
 
             if (string.IsNullOrWhiteSpace(text))
-                throw new ArgumentException("Cannot render a null or empty string");
+                throw new ArgumentNullException(nameof(text), "Cannot render a null or empty string");
 
             using (var font = new Font(fontName, fontSize, fontStyle, GraphicsUnit.Pixel))
             {
                 SizeF estimated_size = EstimateTextWidth(font, text);
-                Bitmap output_image = new Bitmap((int)estimated_size.Width, (int)estimated_size.Height);
+                var output_image = new Bitmap((int)estimated_size.Width, (int)estimated_size.Height);
 
                 using (var graphics = Graphics.FromImage(output_image))
                 {
@@ -233,13 +236,13 @@ namespace ImageManipulation
         public static Dictionary<char, Bitmap> GenerateFontMappedCharacterSet(string fontName, float fontSize, FontStyle fontStyle, char[] characterSet, Color textColor, Color backgroundColor, bool transparent)
         {
             if (string.IsNullOrWhiteSpace(fontName))
-                throw new ArgumentException("Cannot write text with a null font");
+                throw new ArgumentNullException(nameof(fontName), "Cannot write text with a null font");
 
             if (fontSize < float.Epsilon)
                 throw new ArgumentException("Font size must be greater than 0");
 
             if (characterSet == null || characterSet.Length < 1)
-                throw new ArgumentException("Cannot render a null or empty character set");
+                throw new ArgumentNullException(nameof(characterSet), "Cannot render a null or empty character set");
 
             var output = new Dictionary<char, Bitmap>();
 
@@ -261,7 +264,7 @@ namespace ImageManipulation
         public static SizeF EstimateTextWidth(Font font, string text)
         {
             if (font == null)
-                throw new ArgumentException("Cannot write text with a null font");
+                throw new ArgumentNullException(nameof(font));
 
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Cannot render a null or empty string");
@@ -269,7 +272,7 @@ namespace ImageManipulation
             if (font.Size < float.Epsilon)
                 throw new ArgumentException("Font size must be greater than 0");
 
-            using (Bitmap buffer = new Bitmap(1, 1))
+            using (var buffer = new Bitmap(1, 1))
             {
                 using (var graphics = Graphics.FromImage(buffer))
                 {
@@ -293,7 +296,10 @@ namespace ImageManipulation
         /// </summary>
         public static Bitmap OverlayImage(Bitmap backgoundImage, Bitmap overlayImage)
         {
-            Point center_point = new Point((backgoundImage.Width - overlayImage.Width) / 2, (backgoundImage.Height - overlayImage.Height) / 2);
+            if (backgoundImage == null)
+                throw new ArgumentNullException(nameof(backgoundImage));
+
+            var center_point = new Point((backgoundImage.Width - overlayImage.Width) / 2, (backgoundImage.Height - overlayImage.Height) / 2);
             return OverlayImage(backgoundImage, overlayImage, center_point);
         }
 
@@ -303,10 +309,10 @@ namespace ImageManipulation
         public static Bitmap OverlayImage(Bitmap backgoundImage, Bitmap overlayImage, Point overlayPoint)
         {
             if (backgoundImage == null)
-                throw new ArgumentException("Background image cannot be null");
+                throw new ArgumentNullException(nameof(backgoundImage));
 
             if (overlayImage == null)
-                throw new ArgumentException("Overlay image cannot be null");
+                throw new ArgumentNullException(nameof(overlayImage));
 
             using (var graphics = Graphics.FromImage(backgoundImage))
             {
@@ -326,12 +332,12 @@ namespace ImageManipulation
         public static Bitmap DrawBorderAroundImage(Bitmap image, int borderWidth, Color borderColor)
         {
             if (image == null)
-                throw new ArgumentException("Image cannot be null");
+                throw new ArgumentNullException(nameof(image));
 
             if (borderWidth < 1)
                 throw new ArgumentException("Border width cannot be less than 1");
 
-            Bitmap output = new Bitmap(image.Width + 2 * borderWidth, image.Height + 2 * borderWidth);
+            var output = new Bitmap(image.Width + 2 * borderWidth, image.Height + 2 * borderWidth);
 
             using (var graphics = Graphics.FromImage(output))
             {
@@ -352,7 +358,7 @@ namespace ImageManipulation
         public static Bitmap ConvertImageFormat(Bitmap image, ImageFormat newFormat)
         {
             if (image == null)
-                throw new ArgumentException("Image cannot be null");
+                throw new ArgumentNullException(nameof(image));
 
             if (newFormat == null)
                 throw new ArgumentException("Image format cannot be null");
@@ -376,11 +382,8 @@ namespace ImageManipulation
         /// </summary>
         public static byte[] ConvertImageFormat(byte[] imageBytes, ImageFormat newFormat)
         {
-            if (imageBytes == null)
-                throw new ArgumentException("Image bytes cannot be null");
-
-            if (imageBytes.Length < 1)
-                throw new ArgumentException("Image bytes cannot empty");
+            if (imageBytes == null || imageBytes.Length < 1)
+                throw new ArgumentNullException(nameof(imageBytes), "ImageBytes cannot be null or empty");
 
             using (var input_stream = new MemoryStream(imageBytes))
             {
@@ -401,7 +404,7 @@ namespace ImageManipulation
         public static Bitmap FloodFillImage(Bitmap image, Color textColor)
         {
             if (image == null)
-                throw new ArgumentException("Image cannot be null");
+                throw new ArgumentNullException(nameof(image));
 
             using (var graphics = Graphics.FromImage(image))
             {
@@ -417,7 +420,7 @@ namespace ImageManipulation
         public static Bitmap AlterImageOpacity(Bitmap image, float opacity)
         {
             if (image == null)
-                throw new ArgumentException("Image cannot be null");
+                throw new ArgumentNullException(nameof(image));
 
             if (opacity < 0)
                 throw new ArgumentException("Image opacity cannot be less than 0");
@@ -427,12 +430,11 @@ namespace ImageManipulation
 
             var output = new Bitmap(image.Width, image.Height);
 
-            using (Graphics graphics = Graphics.FromImage(output))
+            using (var graphics = Graphics.FromImage(output))
             {
-                var matrix = new ColorMatrix();
-                matrix.Matrix33 = opacity;
+                var matrix = new ColorMatrix() { Matrix33 = opacity };
 
-                ImageAttributes image_attributes = new ImageAttributes();
+                var image_attributes = new ImageAttributes();
 
                 image_attributes.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
 
@@ -454,10 +456,13 @@ namespace ImageManipulation
         /// In the image module we converted signature images into transparent gifs, this is intended to be a replacement.
         /// This is a much better / safe method, as it doesn't use any unnmanaged code pointers.
         /// </summary>
-        public static Bitmap MakeImageTransparent(Bitmap image, Color transparencyColor)
+        public static Bitmap MakeImageTransparent(Bitmap input, Color transparencyColor)
         {
-            image.MakeTransparent(transparencyColor);
-            return image;
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+
+            input.MakeTransparent(transparencyColor);
+            return input;
         }
 
         /// <summary>
@@ -465,11 +470,14 @@ namespace ImageManipulation
         /// </summary>
         public static Bitmap ConvertImageToGrayscale(Bitmap input)
         {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+
             var output = new Bitmap(input.Width, input.Height);
 
-            using (Graphics graphics = Graphics.FromImage(output))
+            using (var graphics = Graphics.FromImage(output))
             {
-                ColorMatrix colorMatrix = new ColorMatrix(
+                var colorMatrix = new ColorMatrix(
                 new float[][]
                 {
                     new float[] {.3f, .3f, .3f, 0, 0},
@@ -479,7 +487,7 @@ namespace ImageManipulation
                     new float[] {0, 0, 0, 0, 1}
                 });
 
-                ImageAttributes attributes = new ImageAttributes();
+                var attributes = new ImageAttributes();
                 attributes.SetColorMatrix(colorMatrix);
 
                 //draw the original image on the new image using the grayscale color matrix
@@ -500,11 +508,8 @@ namespace ImageManipulation
         /// </summary>
         public static byte[] FlattenTransparentImage(byte[] imageBytes, Color newBackgroundColor)
         {
-            if (imageBytes == null)
-                throw new ArgumentException("Image bytes cannot be null");
-
-            if (imageBytes.Length < 1)
-                throw new ArgumentException("Image bytes cannot empty");
+            if (imageBytes == null || imageBytes.Length < 1)
+                throw new ArgumentNullException(nameof(imageBytes), "ImageBytes cannot be null or empty");
 
             using (var input_stream = new MemoryStream(imageBytes))
             {
@@ -525,17 +530,20 @@ namespace ImageManipulation
         /// <summary>
         /// Flattens an image over a colored background to replace the transparency with a solid color.
         /// </summary>
-        public static Bitmap FlattenTransparentImage(Bitmap image, Color newBackgroundColor)
+        public static Bitmap FlattenTransparentImage(Bitmap input, Color newBackgroundColor)
         {
-            var output_image = new Bitmap(image.Width, image.Height);
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
 
-            using (var graphics = Graphics.FromImage(output_image))
+            var output = new Bitmap(input.Width, input.Height);
+
+            using (var graphics = Graphics.FromImage(output))
             {
-                graphics.FillRectangle(new SolidBrush(newBackgroundColor), 0, 0, output_image.Width, output_image.Height);
-                graphics.DrawImage(image, Point.Empty);
+                graphics.FillRectangle(new SolidBrush(newBackgroundColor), 0, 0, output.Width, output.Height);
+                graphics.DrawImage(input, Point.Empty);
             }
 
-            return output_image;
+            return output;
         }
 
         /// <summary>
@@ -543,11 +551,14 @@ namespace ImageManipulation
         /// </summary>
         public static Bitmap ConvertToGrayscale(Bitmap input)
         {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+
             var output = new Bitmap(input.Width, input.Height);
 
-            using (Graphics graphics = Graphics.FromImage(output))
+            using (var graphics = Graphics.FromImage(output))
             {
-                ColorMatrix color_matrix = new ColorMatrix(new float[][]
+                var color_matrix = new ColorMatrix(new float[][]
                 {
                     new float[] {0.30f, 0.30f, 0.30f, 0.00f, 0.00f},
                     new float[] {0.59f, 0.59f, 0.59f, 0.00f, 0.00f},
@@ -556,7 +567,7 @@ namespace ImageManipulation
                     new float[] {0.00f, 0.00f, 0.00f, 0.00f, 1.00f}
                 });
 
-                ImageAttributes attributes = new ImageAttributes();
+                var attributes = new ImageAttributes();
                 attributes.SetColorMatrix(color_matrix);
 
                 graphics.DrawImage(input,
@@ -577,11 +588,14 @@ namespace ImageManipulation
         /// </summary>
         public static Bitmap ConvertToNegative(Bitmap input)
         {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+
             var output = new Bitmap(input.Width, input.Height);
 
-            using (Graphics graphics = Graphics.FromImage(output))
+            using (var graphics = Graphics.FromImage(output))
             {
-                ColorMatrix color_matrix = new ColorMatrix(new float[][]
+                var colorMatrix = new ColorMatrix(new float[][]
                 {
                     new float[] {-1, 0, 0, 0, 0},
                     new float[] {0, -1, 0, 0, 0},
@@ -590,8 +604,8 @@ namespace ImageManipulation
                     new float[] {0, 0, 0, 0, 1}
                 });
 
-                ImageAttributes attributes = new ImageAttributes();
-                attributes.SetColorMatrix(color_matrix);
+                var attributes = new ImageAttributes();
+                attributes.SetColorMatrix(colorMatrix);
 
                 graphics.DrawImage(input,
                     new Rectangle(0, 0, input.Width, input.Height),
@@ -608,6 +622,9 @@ namespace ImageManipulation
 
         public static Bitmap ConvertToSepiaTone(Bitmap input)
         {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+
             //http://blogs.techrepublic.com.com/howdoi/?p=120 for full details
 
             int height = input.Size.Height;
@@ -619,15 +636,15 @@ namespace ImageManipulation
                 {
                     Color color = input.GetPixel(x, y);
 
-                    double output_red = (color.R * .393) + (color.G * .769) + (color.B * .189);
-                    double output_green = (color.R * .349) + (color.G * .686) + (color.B * .168);
-                    double output_blue = (color.R * .272) + (color.G * .534) + (color.B * .131);
+                    double outputRed = (color.R * .393) + (color.G * .769) + (color.B * .189);
+                    double outputGreen = (color.R * .349) + (color.G * .686) + (color.B * .168);
+                    double outputBlue = (color.R * .272) + (color.G * .534) + (color.B * .131);
 
-                    if (output_red > 255) output_red = 255;
-                    if (output_green > 255) output_green = 255;
-                    if (output_blue > 255) output_blue = 255;
+                    if (outputRed > 255) outputRed = 255;
+                    if (outputGreen > 255) outputGreen = 255;
+                    if (outputBlue > 255) outputBlue = 255;
 
-                    input.SetPixel(x, y, Color.FromArgb((int)output_red, (int)output_green, (int)output_blue));
+                    input.SetPixel(x, y, Color.FromArgb((int)outputRed, (int)outputGreen, (int)outputBlue));
                 }
             }
 
@@ -637,7 +654,7 @@ namespace ImageManipulation
         public static Bitmap ConvertToToMonochrome(System.Drawing.Image input)
         {
             if (input == null)
-                throw new ArgumentNullException("Image cannot be null");
+                throw new ArgumentNullException(nameof(input));
 
             var cm = new ColorMatrix(new float[][]
             {
@@ -671,6 +688,9 @@ namespace ImageManipulation
 
         public static byte[] ComputeHash(Bitmap input)
         {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+
             // http://www.hackerfactor.com/blog/?/archives/432-Looks-Like-It.html
             // https://jenssegers.com/61/perceptual-image-hashes
 
@@ -681,19 +701,19 @@ namespace ImageManipulation
             thumbnail = ConvertImageToGrayscale(thumbnail);
 
             // 3) get average pixel color
-            int average_value = 0;
+            int averageValue = 0;
 
             for (int i = 0; i < 63; i++)
-                average_value += thumbnail.GetPixel(i % 8, i / 8).R;
+                averageValue += thumbnail.GetPixel(i % 8, i / 8).R;
 
-            average_value /= 64;
+            averageValue /= 64;
 
             // 4) set the bits.  bits are set if above average
             ulong image_hash = 0;
 
             for (int i = 0; i < 63; i++)
             {
-                bool buffer = thumbnail.GetPixel(i % 8, i / 8).R > average_value;
+                bool buffer = thumbnail.GetPixel(i % 8, i / 8).R > averageValue;
 
                 if (buffer)
                     image_hash |= ((ulong)1 << i);
@@ -712,43 +732,49 @@ namespace ImageManipulation
         /// </summary>
         public static int ComputeHammingDistance(byte[] array1, byte[] array2)
         {
-            if (array1 == null || array2 == null)
-                throw new ArgumentException("One or both arrays are null");
+            if (array1 == null)
+                throw new ArgumentNullException(nameof(array1));
+
+            if (array2 == null)
+                throw new ArgumentNullException(nameof(array2));
 
             if (array1.Length != array2.Length)
                 throw new ArgumentException("Arrays are unequal lengths");
 
-            int diff_count = 0;
+            int diffCount = 0;
 
             for (int i = 0; i < array1.Length; i++)
             {
                 if (array1[i] != array2[i])
-                    diff_count++;
+                    diffCount++;
             }
 
-            return diff_count;
+            return diffCount;
         }
 
         public static int ComputeSumByteDistance(byte[] array1, byte[] array2)
         {
-            if (array1 == null || array2 == null)
-                throw new ArgumentException("One or both arrays are null");
+            if (array1 == null)
+                throw new ArgumentNullException(nameof(array1));
+
+            if (array2 == null)
+                throw new ArgumentNullException(nameof(array2));
 
             if (array1.Length != array2.Length)
                 throw new ArgumentException("Arrays are unequal lengths");
 
-            int diff_count = 0;
+            int diffCount = 0;
 
             for (int i = 0; i < array1.Length; i++)
-                diff_count += Math.Abs((int)array1[i] - (int)array2[i]);
+                diffCount += Math.Abs(array1[i] - array2[i]);
 
-            return diff_count;
+            return diffCount;
         }
 
         public static string ByteWriter(byte[] array)
         {
             if (array == null || array.Length < 1)
-                throw new ArgumentException("array cannot be null or empty");
+                throw new ArgumentNullException(nameof(array), "array cannot be null or empty");
 
             return BitConverter.ToString(array).Replace("-", string.Empty).ToLower();
         }

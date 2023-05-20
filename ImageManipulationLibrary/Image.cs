@@ -11,41 +11,30 @@ namespace ImageManipulation
         protected string _FileName;
         protected Bitmap _Bitmap;
 
-        public string Filename
-        {
-            get { return _FileName; }
-            set { _FileName = value; }
-        }
-        public Bitmap bitmap
-        {
-            get { return _Bitmap; }
-            set { _Bitmap = value; }
-        }
-
         public Image() { }
 
-        public Image(string file_name)
+        public Image(string fileName)
         {
-            _FileName = file_name;
+            _FileName = fileName;
             LoadImage();
         }
 
-        public Image(string file_name, Bitmap image)
+        public Image(string fileName, Bitmap bitmap)
         {
-            _FileName = file_name;
-            _Bitmap = image;
+            _FileName = fileName;
+            _Bitmap = bitmap;
         }
 
-        public bool ResizeImage(float scale_factor)
+        public bool ResizeImage(float scaleFactor)
         {
-            if (scale_factor == 1f)
+            if (scaleFactor == 1f)
                 return true;
 
-            if (scale_factor < float.Epsilon)
+            if (scaleFactor < float.Epsilon)
                 return false;
 
-            int new_width = (int)(scale_factor * _Bitmap.Width);
-            int new_height = (int)(scale_factor * _Bitmap.Height);
+            int new_width = (int)(scaleFactor * _Bitmap.Width);
+            int new_height = (int)(scaleFactor * _Bitmap.Height);
 
             return ResizeImage(new_width, new_height);
         }
@@ -84,25 +73,24 @@ namespace ImageManipulation
         /// Scales down the image if it is larger than the arguments passed in.
         /// scalling is not preformed if the max value is 0 or less.
         /// </summary>
-        public bool ScaleToMaxSize(int max_width, int max_height)
+        public bool ScaleToMaxSize(int maxWidth, int maxHeight)
         {
             if (_Bitmap == null || _Bitmap.Width == 0 || _Bitmap.Height == 0)
                 return false;
 
-            float scale_factor = 1.0f;
-            float scale_x = 1.0f;
-            float scale_y = 1.0f;
+            float scaleX = 1.0f;
+            float scaleY = 1.0f;
 
-            if (_Bitmap.Width > 0 && _Bitmap.Width > max_width)
-                scale_x = ((float)max_width / (float)_Bitmap.Width);
+            if (_Bitmap.Width > 0 && _Bitmap.Width > maxWidth)
+                scaleX = (maxWidth / _Bitmap.Width);
 
-            if (_Bitmap.Height > 0 && _Bitmap.Height > max_height)
-                scale_y = ((float)max_height / (float)_Bitmap.Height);
+            if (_Bitmap.Height > 0 && _Bitmap.Height > maxHeight)
+                scaleY = (maxHeight / _Bitmap.Height);
 
-            if (scale_x != 1f || scale_y != 1f)
+            if (scaleX != 1f || scaleY != 1f)
             {
-                scale_factor = (scale_x < scale_y) ? scale_x : scale_y;
-                return ResizeImage(scale_factor);
+                var scaleFactor = (scaleX < scaleY) ? scaleX : scaleY;
+                return ResizeImage(scaleFactor);
             }
             else
             {
@@ -118,7 +106,7 @@ namespace ImageManipulation
             try
             {
                 // wierd fucking accrobatics in code to get the bitmap object to release its handels...
-                Bitmap buffer = new Bitmap(_Bitmap);
+                var buffer = new Bitmap(_Bitmap);
                 _Bitmap.Dispose();
                 GC.Collect();
 
@@ -145,13 +133,13 @@ namespace ImageManipulation
             {
                 if (File.Exists(_FileName))
                     _Bitmap = new Bitmap(_FileName);
+
+                return true;
             }
             catch
             {
                 return false;
             }
-
-            return true;
         }
     }
 }
