@@ -1,8 +1,7 @@
-﻿using System;
-using System.Drawing;
-
-using ImageManipulation;
+﻿using ImageManipulation;
 using NUnit.Framework;
+using System;
+using System.Drawing;
 
 namespace GeometryTests
 {

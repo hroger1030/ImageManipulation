@@ -6,34 +6,34 @@ using System.IO;
 
 namespace ImageManipulation
 {
-    public class cImage
+    public class Image
     {
         protected string _FileName;
-        protected Bitmap _Image;
+        protected Bitmap _Bitmap;
 
         public string Filename
         {
             get { return _FileName; }
             set { _FileName = value; }
         }
-        public Bitmap Image
+        public Bitmap bitmap
         {
-            get { return _Image; }
-            set { _Image = value; }
+            get { return _Bitmap; }
+            set { _Bitmap = value; }
         }
 
-        public cImage() { }
+        public Image() { }
 
-        public cImage(string file_name)
+        public Image(string file_name)
         {
             _FileName = file_name;
             LoadImage();
         }
 
-        public cImage(string file_name, Bitmap image)
+        public Image(string file_name, Bitmap image)
         {
             _FileName = file_name;
-            _Image = image;
+            _Bitmap = image;
         }
 
         public bool ResizeImage(float scale_factor)
@@ -44,8 +44,8 @@ namespace ImageManipulation
             if (scale_factor < float.Epsilon)
                 return false;
 
-            int new_width = (int)(scale_factor * _Image.Width);
-            int new_height = (int)(scale_factor * _Image.Height);
+            int new_width = (int)(scale_factor * _Bitmap.Width);
+            int new_height = (int)(scale_factor * _Bitmap.Height);
 
             return ResizeImage(new_width, new_height);
         }
@@ -58,19 +58,19 @@ namespace ImageManipulation
             try
             {
                 var new_bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-                new_bitmap.SetResolution(_Image.HorizontalResolution, _Image.VerticalResolution);
+                new_bitmap.SetResolution(_Bitmap.HorizontalResolution, _Bitmap.VerticalResolution);
 
                 using (Graphics graphics = Graphics.FromImage(new_bitmap))
                 {
                     graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                    graphics.DrawImage(_Image,
+                    graphics.DrawImage(_Bitmap,
                                       new Rectangle(0, 0, width, height),
-                                      new Rectangle(0, 0, _Image.Width, _Image.Height),
+                                      new Rectangle(0, 0, _Bitmap.Width, _Bitmap.Height),
                                       GraphicsUnit.Pixel);
                 }
 
-                _Image = new_bitmap;
+                _Bitmap = new_bitmap;
             }
             catch
             {
@@ -86,18 +86,18 @@ namespace ImageManipulation
         /// </summary>
         public bool ScaleToMaxSize(int max_width, int max_height)
         {
-            if (_Image == null || _Image.Width == 0 || _Image.Height == 0)
+            if (_Bitmap == null || _Bitmap.Width == 0 || _Bitmap.Height == 0)
                 return false;
 
             float scale_factor = 1.0f;
             float scale_x = 1.0f;
             float scale_y = 1.0f;
 
-            if (_Image.Width > 0 && _Image.Width > max_width)
-                scale_x = ((float)max_width / (float)_Image.Width);
+            if (_Bitmap.Width > 0 && _Bitmap.Width > max_width)
+                scale_x = ((float)max_width / (float)_Bitmap.Width);
 
-            if (_Image.Height > 0 && _Image.Height > max_height)
-                scale_y = ((float)max_height / (float)_Image.Height);
+            if (_Bitmap.Height > 0 && _Bitmap.Height > max_height)
+                scale_y = ((float)max_height / (float)_Bitmap.Height);
 
             if (scale_x != 1f || scale_y != 1f)
             {
@@ -112,18 +112,18 @@ namespace ImageManipulation
 
         public bool SaveImage()
         {
-            if (_Image == null)
+            if (_Bitmap == null)
                 return false;
 
             try
             {
                 // wierd fucking accrobatics in code to get the bitmap object to release its handels...
-                Bitmap buffer = new Bitmap(_Image);
-                _Image.Dispose();
+                Bitmap buffer = new Bitmap(_Bitmap);
+                _Bitmap.Dispose();
                 GC.Collect();
 
-                _Image = buffer;
-                _Image.Save(_FileName);
+                _Bitmap = buffer;
+                _Bitmap.Save(_FileName);
             }
             catch
             {
@@ -144,7 +144,7 @@ namespace ImageManipulation
             try
             {
                 if (File.Exists(_FileName))
-                    _Image = new Bitmap(_FileName);
+                    _Bitmap = new Bitmap(_FileName);
             }
             catch
             {

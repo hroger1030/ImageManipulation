@@ -165,44 +165,11 @@ namespace ImageManipulation
         /// <summary>
         /// Writes text to an exiting image.
         /// </summary>
-        public static Bitmap WriteTextToImage(Bitmap image, string font_name, float font_size, FontStyle font_style, string text, Color text_color)
+        public static Bitmap WriteTextToImage(Bitmap image, string fontName, float font_size, FontStyle fontStyle, string text, Color textColor)
         {
             if (image == null)
                 throw new ArgumentException("Cannot write text to a null image");
 
-            if (string.IsNullOrWhiteSpace(font_name))
-                throw new ArgumentException("Cannot write text with a null font");
-
-            if (font_size < float.Epsilon)
-                throw new ArgumentException("Font size must be greater than 0");
-
-            if (string.IsNullOrWhiteSpace(text))
-                throw new ArgumentException("Cannot render a null or empty string");
-
-            if (text_color == null)
-                throw new ArgumentException("Text color cannot be null");
-
-            RectangleF write_area = new RectangleF(0, 0, image.Width, image.Height);
-
-            using (Font font = new Font(font_name, font_size, FontStyle.Regular, GraphicsUnit.Pixel))
-            {
-                using (var graphics = Graphics.FromImage(image))
-                {
-                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-                    graphics.DrawString(text, font, new SolidBrush(text_color), write_area);
-                }
-            }
-
-            return image;
-        }
-
-        /// <summary>
-        /// Creates new image from text string. Output image is sized to fit input text.
-        /// </summary>
-        public static Bitmap WriteTextToImage(string fontName, float font_size, FontStyle font_style, string text, Color text_color, Color background_color, bool transparent)
-        {
             if (string.IsNullOrWhiteSpace(fontName))
                 throw new ArgumentException("Cannot write text with a null font");
 
@@ -212,10 +179,37 @@ namespace ImageManipulation
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Cannot render a null or empty string");
 
-            if (text_color == null)
-                throw new ArgumentException("Text color cannot be null");
+            var write_area = new RectangleF(0, 0, image.Width, image.Height);
 
-            using (Font font = new Font(fontName, font_size, font_style, GraphicsUnit.Pixel))
+            using (var font = new Font(fontName, font_size, FontStyle.Regular, GraphicsUnit.Pixel))
+            {
+                using (var graphics = Graphics.FromImage(image))
+                {
+                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+                    graphics.DrawString(text, font, new SolidBrush(textColor), write_area);
+                }
+            }
+
+            return image;
+        }
+
+        /// <summary>
+        /// Creates new image from text string. Output image is sized to fit input text.
+        /// </summary>
+        public static Bitmap WriteTextToImage(string fontName, float fontSize, FontStyle fontStyle, string text, Color textColor, Color backgroundColor, bool transparent)
+        {
+            if (string.IsNullOrWhiteSpace(fontName))
+                throw new ArgumentException("Cannot write text with a null font");
+
+            if (fontSize < float.Epsilon)
+                throw new ArgumentException("Font size must be greater than 0");
+
+            if (string.IsNullOrWhiteSpace(text))
+                throw new ArgumentException("Cannot render a null or empty string");
+
+            using (var font = new Font(fontName, fontSize, fontStyle, GraphicsUnit.Pixel))
             {
                 SizeF estimated_size = EstimateTextWidth(font, text);
                 Bitmap output_image = new Bitmap((int)estimated_size.Width, (int)estimated_size.Height);
@@ -225,12 +219,12 @@ namespace ImageManipulation
                     graphics.SmoothingMode = SmoothingMode.AntiAlias;
                     graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-                    graphics.Clear(background_color);
-                    graphics.DrawString(text, font, new SolidBrush(text_color), new RectangleF(0, 0, output_image.Width, output_image.Height));
+                    graphics.Clear(backgroundColor);
+                    graphics.DrawString(text, font, new SolidBrush(textColor), new RectangleF(0, 0, output_image.Width, output_image.Height));
                 }
 
                 if (transparent)
-                    output_image.MakeTransparent(background_color);
+                    output_image.MakeTransparent(backgroundColor);
 
                 return output_image;
             }
@@ -246,12 +240,6 @@ namespace ImageManipulation
 
             if (characterSet == null || characterSet.Length < 1)
                 throw new ArgumentException("Cannot render a null or empty character set");
-
-            if (textColor == null)
-                throw new ArgumentException("Text color cannot be null");
-
-            if (backgroundColor == null)
-                throw new ArgumentException("Background color cannot be null");
 
             var output = new Dictionary<char, Bitmap>();
 
@@ -303,10 +291,10 @@ namespace ImageManipulation
         /// <summary>
         /// renders an image on top of another image. Overlayed image will be centered on background image.
         /// </summary>
-        public static Bitmap OverlayImage(Bitmap backgoundImage, Bitmap overlay_image)
+        public static Bitmap OverlayImage(Bitmap backgoundImage, Bitmap overlayImage)
         {
-            Point center_point = new Point((backgoundImage.Width - overlay_image.Width) / 2, (backgoundImage.Height - overlay_image.Height) / 2);
-            return OverlayImage(backgoundImage, overlay_image, center_point);
+            Point center_point = new Point((backgoundImage.Width - overlayImage.Width) / 2, (backgoundImage.Height - overlayImage.Height) / 2);
+            return OverlayImage(backgoundImage, overlayImage, center_point);
         }
 
         /// <summary>
@@ -335,25 +323,22 @@ namespace ImageManipulation
         /// Draws a border around an image. The image will be resized to: 
         /// current width + (2 * border thickness), current height + (2 * border thickness) 
         /// </summary>
-        public static Bitmap DrawBorderAroundImage(Bitmap image, int border_width, Color border_color)
+        public static Bitmap DrawBorderAroundImage(Bitmap image, int borderWidth, Color borderColor)
         {
             if (image == null)
                 throw new ArgumentException("Image cannot be null");
 
-            if (border_color == null)
-                throw new ArgumentException("Border Color cannot be null");
-
-            if (border_width < 1)
+            if (borderWidth < 1)
                 throw new ArgumentException("Border width cannot be less than 1");
 
-            Bitmap output = new Bitmap(image.Width + 2 * border_width, image.Height + 2 * border_width);
+            Bitmap output = new Bitmap(image.Width + 2 * borderWidth, image.Height + 2 * borderWidth);
 
             using (var graphics = Graphics.FromImage(output))
             {
-                graphics.FillRectangle(new SolidBrush(border_color), new Rectangle(0, 0, output.Width, output.Height));
+                graphics.FillRectangle(new SolidBrush(borderColor), new Rectangle(0, 0, output.Width, output.Height));
 
                 graphics.DrawImage(image,
-                    new Rectangle(border_width, border_width, image.Width, image.Height),
+                    new Rectangle(borderWidth, borderWidth, image.Width, image.Height),
                     new Rectangle(0, 0, image.Width, image.Height),
                     GraphicsUnit.Pixel);
             }
@@ -364,15 +349,15 @@ namespace ImageManipulation
         /// <summary>
         /// Converts an image from one format to another in memory. 
         /// </summary>
-        public static Bitmap ConvertImageFormat(Bitmap image, ImageFormat new_format)
+        public static Bitmap ConvertImageFormat(Bitmap image, ImageFormat newFormat)
         {
             if (image == null)
                 throw new ArgumentException("Image cannot be null");
 
-            if (new_format == null)
+            if (newFormat == null)
                 throw new ArgumentException("Image format cannot be null");
 
-            if (new_format.Equals(image.RawFormat))
+            if (newFormat.Equals(image.RawFormat))
             {
                 return image;
             }
@@ -380,8 +365,8 @@ namespace ImageManipulation
             {
                 using (var memory_stream = new MemoryStream())
                 {
-                    image.Save(memory_stream, new_format);
-                    return (Bitmap)Image.FromStream(memory_stream);
+                    image.Save(memory_stream, newFormat);
+                    return (Bitmap)System.Drawing.Image.FromStream(memory_stream);
                 }
             }
         }
@@ -389,21 +374,21 @@ namespace ImageManipulation
         /// <summary>
         /// Converts an image from one format to another in memory. 
         /// </summary>
-        public static byte[] ConvertImageFormat(byte[] image_bytes, ImageFormat new_format)
+        public static byte[] ConvertImageFormat(byte[] imageBytes, ImageFormat newFormat)
         {
-            if (image_bytes == null)
+            if (imageBytes == null)
                 throw new ArgumentException("Image bytes cannot be null");
 
-            if (image_bytes.Length < 1)
+            if (imageBytes.Length < 1)
                 throw new ArgumentException("Image bytes cannot empty");
 
-            using (var input_stream = new MemoryStream(image_bytes))
+            using (var input_stream = new MemoryStream(imageBytes))
             {
                 using (var image = new Bitmap(input_stream))
                 {
                     using (var output_stream = new MemoryStream())
                     {
-                        image.Save(output_stream, new_format);
+                        image.Save(output_stream, newFormat);
                         return output_stream.ToArray();
                     }
                 }
@@ -413,17 +398,14 @@ namespace ImageManipulation
         /// <summary>
         /// Fills an entire image with a single color. 
         /// </summary>
-        public static Bitmap FloodFillImage(Bitmap image, Color text_color)
+        public static Bitmap FloodFillImage(Bitmap image, Color textColor)
         {
             if (image == null)
                 throw new ArgumentException("Image cannot be null");
 
-            if (text_color == null)
-                throw new ArgumentException("Text color cannot be null");
-
             using (var graphics = Graphics.FromImage(image))
             {
-                graphics.Clear(text_color);
+                graphics.Clear(textColor);
             }
 
             return image;
@@ -447,7 +429,7 @@ namespace ImageManipulation
 
             using (Graphics graphics = Graphics.FromImage(output))
             {
-                ColorMatrix matrix = new ColorMatrix();
+                var matrix = new ColorMatrix();
                 matrix.Matrix33 = opacity;
 
                 ImageAttributes image_attributes = new ImageAttributes();
@@ -472,9 +454,9 @@ namespace ImageManipulation
         /// In the image module we converted signature images into transparent gifs, this is intended to be a replacement.
         /// This is a much better / safe method, as it doesn't use any unnmanaged code pointers.
         /// </summary>
-        public static Bitmap MakeImageTransparent(Bitmap image, Color transparency_color)
+        public static Bitmap MakeImageTransparent(Bitmap image, Color transparencyColor)
         {
-            image.MakeTransparent(transparency_color);
+            image.MakeTransparent(transparencyColor);
             return image;
         }
 
@@ -516,19 +498,19 @@ namespace ImageManipulation
         /// with black, wich creates a problem later if the image is then flattened. This method was written to 
         /// allow you to flatten an image with transparency.
         /// </summary>
-        public static byte[] FlattenTransparentImage(byte[] image_bytes, Color new_background_color)
+        public static byte[] FlattenTransparentImage(byte[] imageBytes, Color newBackgroundColor)
         {
-            if (image_bytes == null)
+            if (imageBytes == null)
                 throw new ArgumentException("Image bytes cannot be null");
 
-            if (image_bytes.Length < 1)
+            if (imageBytes.Length < 1)
                 throw new ArgumentException("Image bytes cannot empty");
 
-            using (var input_stream = new MemoryStream(image_bytes))
+            using (var input_stream = new MemoryStream(imageBytes))
             {
                 using (var input_bitmap = new Bitmap(input_stream))
                 {
-                    using (Bitmap output = FlattenTransparentImage(input_bitmap, new_background_color))
+                    using (Bitmap output = FlattenTransparentImage(input_bitmap, newBackgroundColor))
                     {
                         using (var output_stream = new MemoryStream())
                         {
@@ -543,13 +525,13 @@ namespace ImageManipulation
         /// <summary>
         /// Flattens an image over a colored background to replace the transparency with a solid color.
         /// </summary>
-        public static Bitmap FlattenTransparentImage(Bitmap image, Color new_background_color)
+        public static Bitmap FlattenTransparentImage(Bitmap image, Color newBackgroundColor)
         {
             var output_image = new Bitmap(image.Width, image.Height);
 
             using (var graphics = Graphics.FromImage(output_image))
             {
-                graphics.FillRectangle(new SolidBrush(new_background_color), 0, 0, output_image.Width, output_image.Height);
+                graphics.FillRectangle(new SolidBrush(newBackgroundColor), 0, 0, output_image.Width, output_image.Height);
                 graphics.DrawImage(image, Point.Empty);
             }
 
@@ -652,7 +634,7 @@ namespace ImageManipulation
             return input;
         }
 
-        public static Bitmap ConvertToToMonochrome(Image input)
+        public static Bitmap ConvertToToMonochrome(System.Drawing.Image input)
         {
             if (input == null)
                 throw new ArgumentNullException("Image cannot be null");
