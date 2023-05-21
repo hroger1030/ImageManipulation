@@ -30,6 +30,50 @@ namespace ImageManipulation
 
         public Image() { }
 
+        /// <summary>
+        /// Generates a new image in memory.
+        /// </summary>
+        /// <param name="width">Width of image in pixels</param>
+        /// <param name="height">Height of image in pixels</param>
+        /// <param name="colorDepth"> (8|16|24|32) bit color supported</param>
+        public Image(int width, int height, int colorDepth, Color fillColor)
+        {
+            if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
+            if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
+
+            PixelFormat format;
+
+            switch (colorDepth)
+            {
+                case 8:
+                    format = PixelFormat.Format8bppIndexed;
+                    break;
+
+                case 16:
+                    format = PixelFormat.Format16bppRgb565;
+                    break;
+
+                case 24:
+                    format = PixelFormat.Format24bppRgb;
+                    break;
+
+                case 32:
+                    format = PixelFormat.Format32bppArgb;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(colorDepth), $"Invalid color depth, '{colorDepth}' is unrecognized");
+            }
+
+            _Bitmap = new Bitmap(width, height, format);
+
+            using var graphics = Graphics.FromImage(_Bitmap);
+            graphics.Clear(fillColor);
+        }
+
+        /// <summary>
+        /// Load image from disk
+        /// </summary>
         public Image(string filename)
         {
             if (string.IsNullOrWhiteSpace(filename))

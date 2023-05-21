@@ -26,7 +26,7 @@ using System.IO;
 
 namespace ImageManipulation
 {
-    public static class HelperFunctions
+    public static class ImageTransform
     {
         /// <summary>
         /// Returns a collection of image encoders in dictionary format with the key being the mime type. ("image/jpeg")
@@ -470,10 +470,6 @@ namespace ImageManipulation
             return output;
         }
 
-        /// <summary>
-        /// In the image module we converted signature images into transparent gifs, this is intended to be a replacement.
-        /// This is a much better / safe method, as it doesn't use any unnmanaged code pointers.
-        /// </summary>
         public static Bitmap MakeImageTransparent(Bitmap input, Color transparencyColor)
         {
             if (input == null)
