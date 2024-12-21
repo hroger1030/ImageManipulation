@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Title>An image manipulation library</Title>
     <PackageProjectUrl>https://github.com/hroger1030/ImageManipulation</PackageProjectUrl>
     <RepositoryUrl>https://github.com/hroger1030/ImageManipulation</RepositoryUrl>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
     <Copyright>Copyright GlobalConquestGames</Copyright>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
